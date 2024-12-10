@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
+from tkinter import filedialog
+import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -8,31 +10,51 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV
 import joblib
 
-# Define function to train the model and save it
-offset_set_1 = np.array([(111.1, 511.1), (112.1, 512.1), (118.1, 510.1), (115.1, 515.1), (112.1, 517.1),
-                         (121.1, 521.1), (122.1, 522.1), (128.1, 520.1), (125.1, 525.1), (122.1, 527.1),
-                         (101.1, 501.1), (102.1, 502.1), (108.1, 500.1), (105.1, 505.1), (102.1, 507.1),
-                         (141.1, 541.1), (142.1, 542.1), (148.1, 540.1), (145.1, 545.1), (142.1, 547.1),
-                         (151.1, 551.1), (152.1, 552.1), (158.1, 550.1), (155.1, 555.1), (152.1, 557.1)])
-offset_set_2 = np.array([(111.5, 511.5), (112.5, 512.5), (118.5, 510.5), (115.5, 515.5), (112.5, 517.5),
-                         (121.5, 521.5), (122.5, 522.5), (128.5, 520.5), (125.5, 525.5), (122.5, 527.5),
-                         (101.5, 501.5), (102.5, 502.5), (108.5, 500.5), (105.5, 505.5), (102.5, 507.5),
-                         (141.5, 541.5), (142.5, 542.5), (148.5, 540.5), (145.5, 545.5), (142.5, 547.5),
-                         (151.5, 551.5), (152.5, 552.5), (158.5, 550.5), (155.5, 555.5), (152.5, 557.5)])
-offset_set_3 = np.array([(111.9, 511.9), (112.9, 512.9), (118.9, 510.9), (115.9, 515.9), (112.9, 517.9),
-                         (121.9, 521.9), (122.9, 522.9), (128.9, 520.9), (125.9, 525.9), (122.9, 527.9),
-                         (101.9, 501.9), (102.9, 502.9), (108.9, 500.9), (105.9, 505.9), (102.9, 507.9),
-                         (141.9, 541.9), (142.9, 542.9), (148.9, 540.9), (145.9, 545.9), (142.9, 547.9),
-                         (151.9, 551.9), (152.9, 552.9), (158.9, 550.9), (155.9, 555.9), (152.9, 557.9)])
+def parseInputData():
+    filePaths = filedialog.askopenfilenames(defaultextension=".csv", filetypes=[("CSV files", "*.csv"), ("Text files", "*.txt")])
+    # file_path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV files", "*.csv")])
+    if filePaths:  # Ensure the user has selected a valid path
+        print(f'File paths: {filePaths[0]} ')
+        
+        global received_data
+        
+        received_data = pd.DataFrame(pd.read_csv(filePaths[0])).to_numpy()
+        print(f'shape of data: {received_data.shape}')
+        print(f'x range:{min(received_data[:,0])}-{max(received_data[:,0])}\n\
+              y range:{min(received_data[:,1])}-{max(received_data[:,1])}\n\
+              x offset range:{min(received_data[:,2])}-{max(received_data[:,2])}\n\
+              y offset range:{min(received_data[:,3])}-{max(received_data[:,3])}\n')
+        
+    else:
+        messagebox.showerror("Error", "no files found")
+
+
+# ~~~~~~~~~~~~~~~~~~~GLOBAL VARIABLES~~~~~~~~~~~~~~~~~~~
+offset_set_1 = np.array([(1.111, 5.111), (1.121, 5.121), (1.181, 5.101), (1.151, 5.151), (1.121, 5.171),
+                         (1.211, 5.211), (1.221, 5.221), (1.281, 5.201), (1.251, 5.251), (1.221, 5.271),
+                         (1.011, 5.011), (1.021, 5.021), (1.081, 5.001), (1.051, 5.051), (1.021, 5.071),
+                         (1.411, 5.411), (1.421, 5.421), (1.481, 5.401), (1.451, 5.451), (1.421, 5.471),
+                         (1.511, 5.511), (1.521, 5.521), (1.581, 5.501), (1.551, 5.551), (1.521, 5.571)])
+offset_set_2 = np.array([(1.115, 5.115), (1.125, 5.125), (1.185, 5.105), (1.155, 5.155), (1.125, 5.175),
+                         (1.215, 5.215), (1.225, 5.225), (1.285, 5.205), (1.255, 5.255), (1.225, 5.275),
+                         (1.015, 5.015), (1.025, 5.025), (1.085, 5.005), (1.055, 5.055), (1.025, 5.075),
+                         (1.415, 5.415), (1.425, 5.425), (1.485, 5.405), (1.455, 5.455), (1.425, 5.475),
+                         (1.515, 5.515), (1.525, 5.525), (1.585, 5.505), (1.555, 5.555), (1.525, 5.575)])
+offset_set_3 = np.array([(1.119, 5.119), (1.129, 5.129), (1.189, 5.109), (1.159, 5.159), (1.129, 5.179),
+                         (1.219, 5.219), (1.229, 5.229), (1.289, 5.209), (1.259, 5.259), (1.229, 5.279),
+                         (1.019, 5.019), (1.029, 5.029), (1.089, 5.009), (1.059, 5.059), (1.029, 5.079),
+                         (1.419, 5.419), (1.429, 5.429), (1.489, 5.409), (1.459, 5.459), (1.429, 5.479),
+                         (1.519, 5.519), (1.529, 5.529), (1.589, 5.509), (1.559, 5.559), (1.529, 5.579)])
 iteration_number = 3
-
-
+modelReady = False # has model been trained alrdy? loaded alrdy? used to (dis)/allow save csv button
+received_data = None
+predicted_data = None
 
 # Function to search best SVR parameters
 def searchBestSVRParams(svrmodel, input, targetOutput):
     param_grid = {
-    'C': [1e6],  # Trying a range of C values (penalty)
-    'gamma': [ 0.1],  # Trying different gamma values (imptce of each pt)
+    'C': [0.1, 1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6],  # [1e6],  # Trying a range of C values (penalty)
+    'gamma': [0.001, 0.01, 0.1, 0.5, 1, 10, 100 ],  # [ 0.1],  # Trying different gamma values (imptce of each pt)
     # 'kernel': ['rbf', 'poly', 'sigmoid']  # Radial basis function kernel (commonly used for SVR)
     }
     # use GridSearchCV with X-fold cross-validation. X = value set under 'cv' parameter
@@ -72,7 +94,6 @@ def predict_model():
         x_coords = np.arange(min_x, max_x, intvl_x)
         y_coords = np.arange(min_y, max_y, intvl_y)#use arange for floating point; range is for intvls only
 
-
         # Stack all offsets into single array, then combine all into single input array
         X, Y = np.meshgrid(x_coords, y_coords)
         # Stack X and Y into pairs of coordinates
@@ -101,7 +122,7 @@ def predict_model():
         predicted_x_offset = svr_x.predict(new_coords_scaled)
         predicted_y_offset = svr_y.predict(new_coords_scaled)
 
-        result_label.config(text=f"Predicted x-offset: {predicted_x_offset[0]}\nPredicted y-offset: {predicted_y_offset[0]}")
+        resultLabel.config(text=f"Predicted x-offset: {predicted_x_offset[0]}\nPredicted y-offset: {predicted_y_offset[0]}")
         
         # test case, predict offsets for a new range of (x, y) coordinates
         x_vals = np.linspace(min_x, max_x - intvl_x, int(max_x))
@@ -114,15 +135,36 @@ def predict_model():
         predicted_x_offsets = svr_x.predict(coords_grid_scaled).reshape(X_grid.shape)
         predicted_y_offsets = svr_y.predict(coords_grid_scaled).reshape(Y_grid.shape)
 
+        # reshape and return in same format as offset_set_1
+        predicted_offsets = np.column_stack((
+            predicted_x_offsets.flatten(),
+            predicted_y_offsets.flatten()
+        ))
+        global predicted_data 
+        predicted_data = np.column_stack((X_grid.flatten(), Y_grid.flatten(), predicted_offsets))
+        
+        print(f'shape of offset:{offset_set_1.shape}|SHAPE OF X: {predicted_x_offsets.shape}||shape of predicted offset: {predicted_offsets.shape}')
+
+        # get index of predicted offset
+        x_index = np.where(np.isclose(x_vals, new_x, atol = 0.8))[0]  # rough index of new_x in autogenerated x_vals range, w absolute tolerance range specified
+        y_index = np.where(np.isclose(y_vals, new_y, atol = 0.8))[0]  # rough index of new_y in autogenerated y_vals range
+        if x_index.size == 0 or y_index.size == 0:
+            raise ValueError(f"New coordinates {new_x} or {new_y} not found in the grid.")
+        # Get first (and hopefully only) match
+        x_index = x_index[0]
+        y_index = y_index[0]  
+        print(f'x index: {x_index}|y index: {y_index}')
         # Generate and display plots
-        generate_plots(coordinate_pairs, offset_set, new_x, new_y, x_vals, y_vals, predicted_x_offset, predicted_y_offset, predicted_x_offsets, predicted_y_offsets)
+        generate_plots(coordinate_pairs, offset_set, x_index, y_index, new_x, new_y, x_vals, y_vals, predicted_x_offset, predicted_y_offset, predicted_x_offsets, predicted_y_offsets)
+        global modelReady
+        modelReady = True
+        saveButton.config(state=tk.NORMAL) # enable savebutton once done
     except Exception as e:                  
         messagebox.showerror("Error", f"An error occurred: {str(e)}")
     
 def train_model():
-    # try:
+    try:
         # Gather user inputs
-        
         min_x = float(min_x_entry.get())
         max_x = float(max_x_entry.get())
         intvl_x = float(intvl_x_entry.get())
@@ -151,7 +193,7 @@ def train_model():
 
         # Create offsets based on user input (dummy values for the example)
         offsets = []
-        for _ in range(iteration_number):
+        for _ in range(iteration_number): # just loop iteration_number times
             # offsets.append(np.random.rand(len(x_coords) * len(y_coords), 2))  # Generate random offsets
             # ^ should append like this, but for now we hardcode the offsets.
             print("offset set appended to offsets array")
@@ -161,10 +203,30 @@ def train_model():
         # Create SVR models and search for best parameters
         svr_x = SVR(kernel='rbf')
         svr_y = SVR(kernel='rbf')
-        if customHyperParams == 0:
+        if customHyperParams.get() == 0: # cue the spaghetti code...
+            print(f'customHyperParams is 0. disabling hyperparams frame')
             bestC_x, bestG_x = searchBestSVRParams(svr_x, coords_scaled_nSets, offset_set[:, 0])
             bestC_y, bestG_y = searchBestSVRParams(svr_y, coords_scaled_nSets, offset_set[:, 1])
+
+            X_C_entry.config(state=tk.NORMAL)#enable so that i can change the values
+            X_G_entry.config(state=tk.NORMAL)
+            Y_C_entry.config(state=tk.NORMAL)
+            Y_G_entry.config(state=tk.NORMAL)
+            X_C_entry.delete(0,'end')
+            X_C_entry.insert(0, bestC_x)
+            X_G_entry.delete(0,'end')
+            X_G_entry.insert(0, bestG_x)
+            Y_C_entry.delete(0,'end')
+            Y_C_entry.insert(0, bestC_y)
+            Y_G_entry.delete(0,'end')
+            Y_G_entry.insert(0, bestG_y)
+            
+            X_C_entry.config(state=tk.DISABLED)#re-disable
+            X_G_entry.config(state=tk.DISABLED)
+            Y_C_entry.config(state=tk.DISABLED)
+            Y_G_entry.config(state=tk.DISABLED)
         else:
+            print(f'customHyperParams is 1. getting values from hyperparams frame')
             bestC_x, bestG_x = float(X_C_entry.get()), float(X_G_entry.get())
             bestC_y, bestG_y = float(Y_C_entry.get()), float(Y_G_entry.get())
         svr_x = SVR(kernel='rbf', C=bestC_x, gamma=bestG_x)
@@ -186,7 +248,7 @@ def train_model():
         predicted_x_offset = svr_x.predict(new_coords_scaled)
         predicted_y_offset = svr_y.predict(new_coords_scaled)
 
-        result_label.config(text=f"Predicted x-offset: {predicted_x_offset[0]}\nPredicted y-offset: {predicted_y_offset[0]}")
+        resultLabel.config(text=f"Predicted x-offset: {predicted_x_offset[0]}\nPredicted y-offset: {predicted_y_offset[0]}")
 
         # test case, predict offsets for a new range of (x, y) coordinates
         x_vals = np.linspace(min_x, max_x - intvl_x, int(max_x)) # generate x coordinates from 0 to max X - intvl of 100, 100 points.
@@ -195,22 +257,34 @@ def train_model():
         coords_grid = np.column_stack((X_grid.ravel(), Y_grid.ravel()))
         coords_grid_scaled = scaler.transform(coords_grid)
 
-        # predict offsets gi
+        # predict offsets
         predicted_x_offsets = svr_x.predict(coords_grid_scaled).reshape(X_grid.shape)
         predicted_y_offsets = svr_y.predict(coords_grid_scaled).reshape(Y_grid.shape)
 
+
+        # get index of predicted offset
+        x_index = np.where(np.isclose(x_vals, new_x, atol = 0.8))[0]  # rough index of new_x in autogenerated x_vals range, w absolute tolerance range specified
+        y_index = np.where(np.isclose(y_vals, new_y, atol = 0.8))[0]  # rough index of new_y in autogenerated y_vals range
+        if x_index.size == 0 or y_index.size == 0:
+            raise ValueError(f"New coordinates {new_x} or {new_y} not found in the grid.")
+        # Get first (and hopefully only) match
+        x_index = x_index[0]
+        y_index = y_index[0]  
+        print(f'x index: {x_index}|y index: {y_index}')
         # Generate and display plots
         print("time to generate plots")
-        generate_plots(coordinate_pairs, offset_set, new_x, new_y, x_vals, y_vals, predicted_x_offset, predicted_y_offset, predicted_x_offsets, predicted_y_offsets)
-
-    # except Exception as e:
-        # messagebox.showerror("Error", f"An error occurred: {str(e)}")
+        generate_plots(coordinate_pairs, offset_set, x_index, y_index, new_x, new_y, x_vals, y_vals, predicted_x_offset, predicted_y_offset, predicted_x_offsets, predicted_y_offsets)
+        global modelReady
+        modelReady = True
+        saveButton.config(state=tk.NORMAL) # enable savebutton once done
+    except Exception as e:
+        messagebox.showerror("Error", f"An error occurred: {str(e)}")
 
 
 # Function to generate plots
-def generate_plots(coordinate_pairs, offset_set, new_x, new_y, x_vals, y_vals, predicted_x_offset, predicted_y_offset, predicted_x_offsets, predicted_y_offsets):
+def generate_plots(coordinate_pairs, offset_set, x_index, y_index, new_x, new_y, x_vals, y_vals, predicted_x_offset, predicted_y_offset, predicted_x_offsets, predicted_y_offsets):
     # Clear previous plot if any
-    for widget in plot_frame.winfo_children():
+    for widget in plotFrame.winfo_children():
         widget.destroy()  # Removes old plots from plot_frame
     
     X_grid, Y_grid = np.meshgrid(x_vals, y_vals)
@@ -238,7 +312,7 @@ def generate_plots(coordinate_pairs, offset_set, new_x, new_y, x_vals, y_vals, p
     ax11.scatter(coordinate_pairs[:, 0], offset_set_3[:, 0], c='g')
 
     # Plot predicted x-offsets over x_vals, sliced along New Y value
-    ax11.plot(x_vals, predicted_x_offsets[int(new_y) - 1, :], color='c', label="Predicted x-offsets") # minus 1 due to indexing. round off if it's decimal points, as this is just for visualisation
+    ax11.plot(x_vals, predicted_x_offsets[y_index, :], color='c', label="Predicted x-offsets") # minus 1 due to indexing. round off if it's decimal points, as this is just for visualisation
     # ^ instead of guessing, fix the following: y_index = np.where(Y_vals == new_y)[0][0]  # Index of Y = 6
     ax11.scatter(new_x, predicted_x_offset, c='c', label=f'Predicted {new_x, new_y} Point')
     ax11.set_xlabel('X coordinate')
@@ -253,7 +327,7 @@ def generate_plots(coordinate_pairs, offset_set, new_x, new_y, x_vals, y_vals, p
     ax12.scatter(coordinate_pairs[:, 1], offset_set_3[:, 0], c='g')
 
     # Plot predicted x-offsets over y_vals,  sliced along New X value
-    ax12.plot(y_vals, predicted_x_offsets[:, int(new_x) - 1], color='c', label="Predicted x-offsets")
+    ax12.plot(y_vals, predicted_x_offsets[:, x_index], color='c', label="Predicted x-offsets")
     ax12.scatter(new_y, predicted_x_offset, c='c', label=f'Predicted {new_x, new_y} Point')
     ax12.set_xlabel('Y coordinate')
     ax12.set_ylabel('Offset')
@@ -280,7 +354,7 @@ def generate_plots(coordinate_pairs, offset_set, new_x, new_y, x_vals, y_vals, p
     ax21.scatter(coordinate_pairs[:, 0], offset_set_3[:, 1], c='g')
 
     # Plot predicted y-offsets over x_vals
-    ax21.plot(x_vals, predicted_y_offsets[int(new_y) - 1, :], color='c', label="Predicted y-offsets")
+    ax21.plot(x_vals, predicted_y_offsets[y_index, :], color='c', label="Predicted y-offsets")
     ax21.scatter(new_x, predicted_y_offset, c='c', label=f'Predicted {new_x, new_y} Point')
     ax21.set_xlabel('X coordinate')
     ax21.set_ylabel('Offset')
@@ -294,7 +368,7 @@ def generate_plots(coordinate_pairs, offset_set, new_x, new_y, x_vals, y_vals, p
     ax22.scatter(coordinate_pairs[:, 1], offset_set_3[:, 1], c='g')
 
     # Plot predicted y-offsets over y_vals
-    ax22.plot(y_vals, predicted_y_offsets[:, int(new_x) - 1], color='c', label="Predicted y-offsets")
+    ax22.plot(y_vals, predicted_y_offsets[:, x_index], color='c', label="Predicted y-offsets")
     ax22.scatter(new_y, predicted_y_offset, c='c', label=f'Predicted {new_x, new_y} Point')
     ax22.set_xlabel('Y coordinate')
     ax22.set_ylabel('Offset')
@@ -305,7 +379,7 @@ def generate_plots(coordinate_pairs, offset_set, new_x, new_y, x_vals, y_vals, p
     # plt.show()
 
     # Display the plot in the Tkinter window
-    canvas = FigureCanvasTkAgg(fig, master=plot_frame)
+    canvas = FigureCanvasTkAgg(fig, master=plotFrame)
     canvas.draw()
     canvas.get_tk_widget().pack()
 
@@ -316,91 +390,83 @@ root.title("SVR Model Training")
 def on_close():
     root.quit()
 
+def saveToCSV():
+    global predicted_data
+    if predicted_data is None:
+        messagebox.showerror("Error", f"nothing to save! Please train or predict the model first.")
+        return
+    df = pd.DataFrame(predicted_data, columns=['x', 'y', 'predicted_x_offset', 'predicted_y_offset'])
+    file_path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV files", "*.csv")])
+    if file_path:  # Ensure the user has selected a valid path
+        df.to_csv(file_path, index=False)  # Save the DataFrame to CSV
+        print(f"Data saved to {file_path}")
+        messagebox.showinfo("Data saved", f"Data saved to {file_path}")
+    else:
+        print("Save operation was cancelled.")
+        messagebox.showinfo("Save operation cancelled", "Save operation was canceled.")
+
 def onCheckboxToggle():
+    
     global X_C_label, X_C_entry, X_G_label, X_G_entry, Y_C_label, Y_C_entry, Y_G_label, Y_G_entry  # declare as global so they can be retrieved in train_model
     if customHyperParams.get() == 1:
-        print("Checkbutton is selected")
-        
-        X_C_label = tk.Label(input_frame, text="Best C value (X):")
-        X_C_label.grid(row=14, column=0, sticky='w') #sticky=w:stick to west of grid
-        X_C_entry = tk.Entry(input_frame)
-        X_C_entry.grid(row=14, column=1)
-        X_C_entry.insert(0, "1000000")
-        X_G_label = tk.Label(input_frame, text="Best Gamma (X):")
-        X_G_label.grid(row=15, column=0, sticky='w')
-        X_G_entry = tk.Entry(input_frame)
-        X_G_entry.grid(row=15, column=1)
-        X_G_entry.insert(0, "0.1")
+        print(f"Checkbutton is selected. customHyperParams value:{customHyperParams.get()}")
+        for child in hyperparams_frame.winfo_children():
+            child.configure(state=tk.NORMAL)
 
-
-        Y_C_label = tk.Label(input_frame, text="Best C value (Y):")
-        Y_C_label.grid(row=16, column=0, sticky='w')
-        Y_C_entry = tk.Entry(input_frame)
-        Y_C_entry.grid(row=16, column=1)
-        Y_C_entry.insert(0, "1000000")
-        Y_G_label = tk.Label(input_frame, text="Best Gamma (Y):")
-        Y_G_label.grid(row=17, column=0, sticky='w')
-        Y_G_entry = tk.Entry(input_frame)
-        Y_G_entry.grid(row=17, column=1)
-        Y_G_entry.insert(0, "0.1")
     else:
-        print("Checkbutton is deselected")
-        X_C_label.grid_forget()
-        X_C_entry.grid_forget()
-        X_G_label.grid_forget()
-        X_G_entry.grid_forget()
-        Y_C_label.grid_forget()
-        Y_C_entry.grid_forget()
-        Y_G_label.grid_forget()
-        Y_G_entry.grid_forget()
+        
+        print(f"Checkbutton is deselected. customHyperParams value:{customHyperParams.get()}")
+        for child in hyperparams_frame.winfo_children():
+            child.configure(state=tk.DISABLED)
+
 
 
 root.protocol("WM_DELETE_WINDOW", on_close)
 
 # create frame for input fields
 input_frame = tk.Frame(root)
-input_frame.grid(row=0, column=0, padx=10, pady=10)
-
+input_frame.grid(row=0, column=0, padx=10, pady=30, sticky="n")
+hyperparams_frame = tk.Frame(input_frame)
+hyperparams_frame.grid(row=15, column=0, padx=10, pady=5, sticky="n")
 # Define labels and entries for parameters
-tk.Label(input_frame, text="Min X:").grid(row=0, column=0, sticky='w')
+tk.Label(input_frame, text="Input data:").grid(row=0, column=0, sticky='w')
+offsets_entry = tk.Button(input_frame, text="Select Files", command=parseInputData)
+offsets_entry.grid(row=0, column=1)
+
+tk.Label(input_frame, text="Min X:").grid(row=1, column=0, sticky='w')
 min_x_entry = tk.Entry(input_frame)
-min_x_entry.grid(row=0, column=1)
+min_x_entry.grid(row=1, column=1)
 min_x_entry.insert(0, "0")
 
-tk.Label(input_frame, text="Max X:").grid(row=1, column=0, sticky='w')
+tk.Label(input_frame, text="Max X:").grid(row=2, column=0, sticky='w')
 max_x_entry = tk.Entry(input_frame)
-max_x_entry.grid(row=1, column=1)
+max_x_entry.grid(row=2, column=1)
 max_x_entry.insert(0, "500")
 
-tk.Label(input_frame, text="Interval X:").grid(row=2, column=0, sticky='w')
+tk.Label(input_frame, text="Interval X:").grid(row=3, column=0, sticky='w')
 intvl_x_entry = tk.Entry(input_frame)
-intvl_x_entry.grid(row=2, column=1)
+intvl_x_entry.grid(row=3, column=1)
 intvl_x_entry.insert(0, "100")
 
-tk.Label(input_frame, text="Min Y:").grid(row=3, column=0, sticky='w')
+tk.Label(input_frame, text="Min Y:").grid(row=4, column=0, sticky='w')
 min_y_entry = tk.Entry(input_frame)
-min_y_entry.grid(row=3, column=1)
+min_y_entry.grid(row=4, column=1)
 min_y_entry.insert(0, "0")
 
-tk.Label(input_frame, text="Max Y:").grid(row=4, column=0, sticky='w')
+tk.Label(input_frame, text="Max Y:").grid(row=5, column=0, sticky='w')
 max_y_entry = tk.Entry(input_frame)
-max_y_entry.grid(row=4, column=1)
+max_y_entry.grid(row=5, column=1)
 max_y_entry.insert(0, "500")
 
-tk.Label(input_frame, text="Interval Y:").grid(row=5, column=0, sticky='w')
+tk.Label(input_frame, text="Interval Y:").grid(row=6, column=0, sticky='w')
 intvl_y_entry = tk.Entry(input_frame)
-intvl_y_entry.grid(row=5, column=1)
+intvl_y_entry.grid(row=6, column=1)
 intvl_y_entry.insert(0, "100")
 
-tk.Label(input_frame, text="Iteration number:").grid(row=6, column=0, sticky='w')
+tk.Label(input_frame, text="Iteration number:").grid(row=7, column=0, sticky='w')
 iteration_number_entry = tk.Entry(input_frame)
-iteration_number_entry.grid(row=6, column=1)
+iteration_number_entry.grid(row=7, column=1)
 iteration_number_entry.insert(0, "3")
-
-tk.Label(input_frame, text="Input data:").grid(row=7, column=0, sticky='w')
-offsets_entry = tk.Entry(input_frame)
-offsets_entry.grid(row=7, column=1)
-offsets_entry.insert(0, "3")
 
 tk.Label(input_frame, text="New X:").grid(row=8, column=0, sticky='w')
 new_x_entry = tk.Entry(input_frame)
@@ -418,25 +484,52 @@ filename_entry.grid(row=10, column=1)
 filename_entry.insert(0, "testGUI")
 
 # Result label for predicted offsets
-result_label = tk.Label(input_frame, text="")
-result_label.grid(row=11, column=1)
+resultLabel = tk.Label(input_frame, text="")
+resultLabel.grid(row=11, column=1)
 
 # Train button
-train_button = tk.Button(input_frame, text="Train Model", command=train_model)
-train_button.grid(row=12, column=0)
+trainButton = tk.Button(input_frame, text="Train Model", command=train_model)
+trainButton.grid(row=12, column=0)
 
 # Predict button
-predict_button = tk.Button(input_frame, text="Predict", command=predict_model)
-predict_button.grid(row=12, column=1)
+predictButton = tk.Button(input_frame, text="Predict", command=predict_model)
+predictButton.grid(row=12, column=1)
 
-plot_frame = tk.Frame(root)
-plot_frame.grid(row=0, column=1, padx=10, pady=10)
+plotFrame = tk.Frame(root)
+plotFrame.grid(row=0, column=1, padx=10, pady=10)
+
+saveButton = tk.Button(input_frame, text="Save to CSV", command=saveToCSV, state=tk.DISABLED)
+saveButton.grid(row=13, column=1)
 
 customHyperParams = tk.IntVar()
-checkButton = tk.Checkbutton(root, text="choose svr hyperparams", onvalue=1, offvalue=0, variable=customHyperParams, command=onCheckboxToggle)
-checkButton.grid(row=13,column=0)
+checkButton = tk.Checkbutton(input_frame, text="Custom Select SVR Hyperparams", onvalue=1, offvalue=0, variable=customHyperParams, command=onCheckboxToggle)
+checkButton.grid(row=14,column=0)
 
+X_C_label = tk.Label(hyperparams_frame, text="Best C value (X):", state=tk.DISABLED)
+X_C_label.grid(row=15, column=0, sticky='w') #sticky=w:stick to west of grid
+X_C_entry = tk.Entry(hyperparams_frame)
+X_C_entry.grid(row=15, column=1)
+X_C_entry.insert(0, "1000000")
+X_C_entry.config(state=tk.DISABLED)
+X_G_label = tk.Label(hyperparams_frame, text="Best Gamma (X):", state=tk.DISABLED)
+X_G_label.grid(row=16, column=0, sticky='w')
+X_G_entry = tk.Entry(hyperparams_frame)
+X_G_entry.grid(row=16, column=1)
+X_G_entry.insert(0, "0.1")
+X_G_entry.config(state=tk.DISABLED)
+
+Y_C_label = tk.Label(hyperparams_frame, text="Best C value (Y):", state=tk.DISABLED)
+Y_C_label.grid(row=17, column=0, sticky='w')
+Y_C_entry = tk.Entry(hyperparams_frame)
+Y_C_entry.grid(row=17, column=1)
+Y_C_entry.insert(0, "1000000")
+Y_C_entry.config(state=tk.DISABLED)
+Y_G_label = tk.Label(hyperparams_frame, text="Best Gamma (Y):", state=tk.DISABLED)
+Y_G_label.grid(row=18, column=0, sticky='w')
+Y_G_entry = tk.Entry(hyperparams_frame)
+Y_G_entry.grid(row=18, column=1)
+Y_G_entry.insert(0, "0.1")
+Y_G_entry.config(state=tk.DISABLED)
 
 # Run the application
 root.mainloop()
-
